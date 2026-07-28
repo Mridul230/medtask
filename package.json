@@ -1,0 +1,30 @@
+{
+  "name": "medtask",
+  "version": "1.0.0",
+  "description": "A task coordination app for hospital staff — doctors and nurses create, assign, and track patient-care tasks by department.",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Mridul230/medtask.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Mridul230/medtask/issues"
+  },
+  "homepage": "https://github.com/Mridul230/medtask#readme",
+  "devDependencies": {
+    "@types/node": "^26.1.1",
+    "prisma": "^7.9.0",
+    "typescript": "^7.0.2"
+  },
+  "dependencies": {
+    "@prisma/client": "^7.9.0",
+    "dotenv": "^17.4.2"
+  }
+}
