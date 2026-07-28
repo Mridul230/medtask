@@ -27,6 +27,15 @@ app.post('/patients', async (req, res) => {
     res.status(400).json({ error: 'Could not create patient' });
   }
 });
+app.get('/patients', async (req, res) => {
+  try {
+    const patients = await prisma.patient.findMany();
+    res.json(patients);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Could not fetch patients' });
+  }
+});
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
