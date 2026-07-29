@@ -1,3 +1,4 @@
+import bcrypt from 'bcrypt';
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
@@ -39,4 +40,21 @@ app.get('/patients', async (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
+});
+
+app.post('/staff/signup', async (req, res) => {
+  try {
+    const { name, email, password, role } = req.body;
+
+    const passwordHash = await bcrypt.hash(password, 10);
+
+    const staff = await prisma.staff.create({
+      data: { name, email, passwordHash, role },
+    });
+
+    res.status(201).json({ id: staff.id, name: staff.name, email: staff.email, role: staff.role });
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({ error: 'Could not create staff account' });
+  }
 });
