@@ -123,6 +123,30 @@ app.patch('/appointments/:id/approve', requireAuth, async (req, res) => {
     res.status(400).json({ error: 'Could not approve appointment' });
   }
 });
+app.post('/tasks', requireAuth, async (req, res) => {
+  try {
+    const { departmentId, appointmentId, title, description, patientReference, priority, assignedToId, dueDate } = req.body;
+
+    const task = await prisma.task.create({
+      data: {
+        departmentId,
+        appointmentId,
+        title,
+        description,
+        patientReference,
+        priority,
+        assignedToId,
+        createdById: req.staff.staffId,
+        dueDate: dueDate ? new Date(dueDate) : null,
+      },
+    });
+
+    res.status(201).json(task);
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({ error: 'Could not create task' });
+  }
+});
 
 
 app.post('/staff/signup', async (req, res) => {
