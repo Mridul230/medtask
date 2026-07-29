@@ -88,6 +88,21 @@ app.post('/appointments', async (req, res) => {
     res.status(400).json({ error: 'Could not create appointment' });
   }
 });
+app.get('/appointments', requireAuth, async (req, res) => {
+  try {
+    const appointments = await prisma.appointment.findMany({
+      include: {
+        patient: true,
+        department: true,
+        doctor: true,
+      },
+    });
+    res.json(appointments);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Could not fetch appointments' });
+  }
+});
 app.patch('/appointments/:id/approve', requireAuth, async (req, res) => {
   try {
     const { id } = req.params;
@@ -108,6 +123,7 @@ app.patch('/appointments/:id/approve', requireAuth, async (req, res) => {
     res.status(400).json({ error: 'Could not approve appointment' });
   }
 });
+
 
 app.post('/staff/signup', async (req, res) => {
   try {
