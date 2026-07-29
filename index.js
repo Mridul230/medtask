@@ -165,6 +165,26 @@ app.get('/tasks', requireAuth, async (req, res) => {
   }
 });
 
+app.patch('/tasks/:id', requireAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status, priority, assignedToId } = req.body;
+
+    const task = await prisma.task.update({
+      where: { id: parseInt(id) },
+      data: {
+        ...(status && { status }),
+        ...(priority && { priority }),
+        ...(assignedToId && { assignedToId }),
+      },
+    });
+
+    res.json(task);
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({ error: 'Could not update task' });
+  }
+});
 
 app.post('/staff/signup', async (req, res) => {
   try {
