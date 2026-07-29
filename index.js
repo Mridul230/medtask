@@ -1,8 +1,25 @@
-import bcrypt from 'bcrypt';
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+function requireAuth(req, res, next) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ error: 'No token provided' });
+  }
+
+  const token = authHeader.split(' ')[1];
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.staff = decoded;
+    next();
+  } catch (error) {
+    return res.status(401).json({ error: 'Invalid or expired token' });
+  }
+}
 
 const app = express();
 const prisma = new PrismaClient();
@@ -14,6 +31,7 @@ app.use(express.json());
 app.get('/', (req, res) => {
   res.json({ message: 'MedTask API is running' });
 });
+
 app.post('/patients', async (req, res) => {
   try {
     const { name, email, phone } = req.body;
@@ -28,6 +46,7 @@ app.post('/patients', async (req, res) => {
     res.status(400).json({ error: 'Could not create patient' });
   }
 });
+
 app.get('/patients', async (req, res) => {
   try {
     const patients = await prisma.patient.findMany();
@@ -36,10 +55,6 @@ app.get('/patients', async (req, res) => {
     console.error(error);
     res.status(500).json({ error: 'Could not fetch patients' });
   }
-});
-
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
 });
 
 app.post('/staff/signup', async (req, res) => {
@@ -57,4 +72,39 @@ app.post('/staff/signup', async (req, res) => {
     console.error(error);
     res.status(400).json({ error: 'Could not create staff account' });
   }
+});
+
+app.post('/staff/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    const staff = await prisma.staff.findUnique({ where: { email } });
+    if (!staff) {
+      return res.status(401).json({ error: 'Invalid email or password' });
+    }
+
+    const isValid = await bcrypt.compare(password, staff.passwordHash);
+    if (!isValid) {
+      return res.status(401).json({ error: 'Invalid email or password' });
+    }
+
+    const token = jwt.sign(
+      { staffId: staff.id, role: staff.role },
+      process.env.JWT_SECRET,
+      { expiresIn: '1d' }
+    );
+
+    res.json({ token, staff: { id: staff.id, name: staff.name, role: staff.role } });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Login failed' });
+  }
+});
+app.get('/staff/me', requireAuth, async (req, res) => {
+  const staff = await prisma.staff.findUnique({ where: { id: req.staff.staffId } });
+  res.json({ id: staff.id, name: staff.name, email: staff.email, role: staff.role });
+})
+
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
 });
