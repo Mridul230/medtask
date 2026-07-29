@@ -147,6 +147,23 @@ app.post('/tasks', requireAuth, async (req, res) => {
     res.status(400).json({ error: 'Could not create task' });
   }
 });
+app.get('/tasks', requireAuth, async (req, res) => {
+  try {
+    const tasks = await prisma.task.findMany({
+      include: {
+        department: true,
+        appointment: true,
+        assignedTo: true,
+        createdBy: true,
+        comments: true,
+      },
+    });
+    res.json(tasks);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Could not fetch tasks' });
+  }
+});
 
 
 app.post('/staff/signup', async (req, res) => {
