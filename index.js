@@ -56,6 +56,38 @@ app.get('/patients', async (req, res) => {
     res.status(500).json({ error: 'Could not fetch patients' });
   }
 });
+app.post('/departments', async (req, res) => {
+  try {
+    const { name } = req.body;
+
+    const department = await prisma.department.create({
+      data: { name },
+    });
+
+    res.status(201).json(department);
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({ error: 'Could not create department' });
+  }
+});
+app.post('/appointments', async (req, res) => {
+  try {
+    const { patientId, departmentId } = req.body;
+
+    const appointment = await prisma.appointment.create({
+      data: {
+        patientId,
+        departmentId,
+        status: 'REQUESTED',
+      },
+    });
+
+    res.status(201).json(appointment);
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({ error: 'Could not create appointment' });
+  }
+});
 
 app.post('/staff/signup', async (req, res) => {
   try {
