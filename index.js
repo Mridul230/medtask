@@ -185,6 +185,25 @@ app.patch('/tasks/:id', requireAuth, async (req, res) => {
     res.status(400).json({ error: 'Could not update task' });
   }
 });
+app.post('/tasks/:id/comments', requireAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { content } = req.body;
+
+    const comment = await prisma.comment.create({
+      data: {
+        taskId: parseInt(id),
+        staffId: req.staff.staffId,
+        content,
+      },
+    });
+
+    res.status(201).json(comment);
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({ error: 'Could not add comment' });
+  }
+});
 
 app.post('/staff/signup', async (req, res) => {
   try {
