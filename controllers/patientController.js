@@ -1,17 +1,16 @@
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import {
+  createPatient as createPatientService,
+  getPatients as getPatientsService,
+} from "../services/patientService.js";
 
 export async function createPatient(req, res) {
   try {
     const { name, email, phone } = req.body;
 
-    const patient = await prisma.patient.create({
-      data: {
-        name,
-        email,
-        phone,
-      },
+    const patient = await createPatientService({
+      name,
+      email,
+      phone,
     });
 
     res.status(201).json(patient);
@@ -25,7 +24,7 @@ export async function createPatient(req, res) {
 
 export async function getPatients(req, res) {
   try {
-    const patients = await prisma.patient.findMany();
+    const patients = await getPatientsService();
 
     res.json(patients);
   } catch (error) {
