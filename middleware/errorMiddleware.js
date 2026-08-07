@@ -1,9 +1,8 @@
+export default function errorMiddleware(err, req, res, next) {
+    console.error(err);
 
-
-export const createPatient = asyncHandler(async (req,res)=>{
-
-    const patient = await createPatientService(...);
-
-    res.status(201).json(patient);
-
-});
+    res.status(err.status || 500).json({
+        success: false,
+        message: err.message || "Internal Server Error"
+    });
+}
