@@ -3,9 +3,9 @@ import express from 'express';
 import cors from 'cors';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
+import jwt from "jsonwebtoken";
 import requireAuth from "./middleware/authMiddleware.js";
-
+import patientRoutes from "./routes/patientRoutes.js";
 
 const app = express();
 const prisma = new PrismaClient();
@@ -18,30 +18,7 @@ app.get('/', (req, res) => {
   res.json({ message: 'MedTask API is running' });
 });
 
-app.post('/patients', async (req, res) => {
-  try {
-    const { name, email, phone } = req.body;
-
-    const patient = await prisma.patient.create({
-      data: { name, email, phone },
-    });
-
-    res.status(201).json(patient);
-  } catch (error) {
-    console.error(error);
-    res.status(400).json({ error: 'Could not create patient' });
-  }
-});
-
-app.get('/patients', async (req, res) => {
-  try {
-    const patients = await prisma.patient.findMany();
-    res.json(patients);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Could not fetch patients' });
-  }
-});
+app.use("/patients", patientRoutes);
 app.post('/departments', async (req, res) => {
   try {
     const { name } = req.body;
